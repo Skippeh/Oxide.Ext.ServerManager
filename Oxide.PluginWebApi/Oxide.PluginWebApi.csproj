@@ -59,6 +59,8 @@
     <Compile Include="ApiConfig.cs" />
     <Compile Include="Configuration\ConfigManager.cs" />
     <Compile Include="Configuration\ConfigFile.cs" />
+    <Compile Include="Nancy\ApiBootstrapper.cs" />
+    <Compile Include="Nancy\ApiJsonSerializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
