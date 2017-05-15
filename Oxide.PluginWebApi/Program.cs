@@ -3,6 +3,7 @@ using System.Net;
 using Nancy.Hosting.Self;
 using Oxide.PluginWebApi.Configuration;
 using Oxide.PluginWebApi.Nancy;
+using Oxide.PluginWebApi.Net;
 
 namespace Oxide.PluginWebApi
 {
@@ -26,6 +27,12 @@ namespace Oxide.PluginWebApi
             {
                 Console.WriteLine($"Starting api server on port {Config.Port}...");
                 host.Start();
+
+                if (!OxideApi.Authenticate(Config.OxideUsername, Config.OxidePassword))
+                {
+                    Console.Error.WriteLine("Failed to authenticate with Oxide.");
+                    return;
+                }
 
                 Console.WriteLine("Press CTRL+Q to stop the server.");
                 ConsoleKeyInfo consoleKeyInfo;

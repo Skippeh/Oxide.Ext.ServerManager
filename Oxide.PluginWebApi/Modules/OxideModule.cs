@@ -1,32 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Nancy;
-using Oxide.PluginWebApi.Api;
+﻿using Oxide.PluginWebApi.Api;
 
 namespace Oxide.PluginWebApi.Modules
 {
     public class OxideModule : BaseModule
     {
-        public OxideModule()
+        public OxideModule() : base("oxide")
         {
-            Get["versions"] = (dynamic _) => GetVersions();
+            Get["lastupdate"] = WrapMethod(_ => GetLastUpdate());
+            Get["plugin/{resourceId:int}"] = WrapMethod((dynamic _) => GetPlugin(_.resourceId));
         }
 
-        private ApiResponse GetVersions()
+        private ApiResponse GetLastUpdate()
         {
-            // Example response, todo: implement
-            return new ApiResponse(new
+            using (var bintray = CreateBintrayApi())
             {
-                Oxide = "1.0.0",
-                Games = new
+                return new ApiResponse(new
                 {
-                    Rust = "1.0.0",
-                    Terraria = "1.0.0"
-                }
-            });
+                    LastUpdate = bintray.GetVersion().Updated
+                });
+            }
+        }
+
+        private ApiResponse GetPlugin(int resourceId)
+        {
+            
+
+            return null;
         }
     }
 }

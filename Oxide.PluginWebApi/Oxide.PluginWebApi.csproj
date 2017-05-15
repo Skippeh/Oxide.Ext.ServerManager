@@ -60,6 +60,7 @@
     <Compile Include="Configuration\ConfigManager.cs" />
     <Compile Include="Configuration\ConfigFile.cs" />
     <Compile Include="Api\ApiResponse.cs" />
+    <Compile Include="Modules\ApiResponseException.cs" />
     <Compile Include="Modules\BaseModule.cs" />
     <Compile Include="Modules\OxideModule.cs" />
     <Compile Include="Nancy\ApiBootstrapper.cs" />
@@ -69,6 +70,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Net\Models\Bintray\File.cs" />
+    <Compile Include="Net\Models\Bintray\Version.cs" />
+    <Compile Include="Net\OxideApi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
