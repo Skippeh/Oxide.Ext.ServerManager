@@ -1,0 +1,3 @@
+[submodule "Oxide"]
+	path = Oxide
+	url = https://github.com/OxideMod/Oxide.git
