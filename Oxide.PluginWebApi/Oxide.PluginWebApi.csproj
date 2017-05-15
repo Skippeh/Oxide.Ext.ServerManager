@@ -59,8 +59,14 @@
     <Compile Include="ApiConfig.cs" />
     <Compile Include="Configuration\ConfigManager.cs" />
     <Compile Include="Configuration\ConfigFile.cs" />
+    <Compile Include="Api\ApiResponse.cs" />
+    <Compile Include="Modules\BaseModule.cs" />
+    <Compile Include="Modules\OxideModule.cs" />
     <Compile Include="Nancy\ApiBootstrapper.cs" />
     <Compile Include="Nancy\ApiJsonSerializer.cs" />
+    <Compile Include="Net\CookieWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -11,6 +11,12 @@ namespace Oxide.PluginWebApi
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string OxidePassword { get; set; } = "";
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string BintrayUsername { get; set; } = "";
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string BintrayApiKey { get; set; } = "";
+
         public int Port { get; set; } = 8090;
     }
 }
