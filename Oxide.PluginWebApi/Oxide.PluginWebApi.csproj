@@ -69,12 +69,14 @@
     <Compile Include="Modules\OxideModule.cs" />
     <Compile Include="Nancy\ApiBootstrapper.cs" />
     <Compile Include="Nancy\ApiJsonSerializer.cs" />
+    <Compile Include="Net\BaseApi.cs" />
     <Compile Include="Net\BintrayApi.cs" />
     <Compile Include="Net\CookieWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Net\Models\Bintray\File.cs" />
     <Compile Include="Net\Models\Bintray\Version.cs" />
+    <Compile Include="Net\Models\Oxide\Plugin.cs" />
     <Compile Include="Net\OxideApi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

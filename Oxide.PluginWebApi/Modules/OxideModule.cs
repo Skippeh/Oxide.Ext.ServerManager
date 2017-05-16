@@ -1,4 +1,6 @@
-﻿using Oxide.PluginWebApi.Api;
+﻿using Nancy;
+using Oxide.PluginWebApi.Api;
+using Oxide.PluginWebApi.Net.Models.Oxide;
 
 namespace Oxide.PluginWebApi.Modules
 {
@@ -23,9 +25,15 @@ namespace Oxide.PluginWebApi.Modules
 
         private ApiResponse GetPlugin(int resourceId)
         {
-            
+            using (var oxide = CreateOxideApi())
+            {
+                Plugin plugin = oxide.GetPlugin(resourceId);
 
-            return null;
+                if (plugin == null)
+                    throw new ApiResponseException(HttpStatusCode.NotFound, "Could not find a plugin with resource id: " + resourceId);
+
+                return new ApiResponse(plugin);
+            }
         }
     }
 }

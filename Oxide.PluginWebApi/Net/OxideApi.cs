@@ -1,56 +1,99 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Oxide.PluginWebApi.Modules;
+using Oxide.PluginWebApi.Net.Models.Oxide;
 
 namespace Oxide.PluginWebApi.Net
 {
-    public class OxideApi : IDisposable
+    public class OxideApi : BaseApi
     {
+        private const string PluginUrl = "http://oxidemod.org/plugins/{0}/history";
+
         private static readonly CookieContainer cookieContainer = new CookieContainer();
-
-        private readonly CookieWebClient webClient;
-
+        
         public static bool Authenticate(string username, string password)
         {
             using (var webClient = new CookieWebClient(cookieContainer))
             {
-                byte[] responseBytes = webClient.UploadValues("http://oxidemod.org/login/login", "POST", new NameValueCollection
+                HttpWebResponse error;
+                string response = PostString(webClient, "http://oxidemod.org/login/login", new NameValueCollection
                 {
                     { "login", username },
                     { "password", password }
-                });
+                }, out error);
 
-                string response = Encoding.UTF8.GetString(responseBytes);
+                if (error != null)
+                {
+                    throw new ApiResponseException(global::Nancy.HttpStatusCode.InternalServerError, error.StatusDescription);
+                }
+
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(response);
+                
+                var rootNode = htmlDoc.DocumentNode;
+                var accountMenu = rootNode.SelectSingleNode("//*[@id=\"AccountMenu\"]");
+                
+                return accountMenu != null;
+            }
+        }
+
+        public Plugin GetPlugin(int resourceId)
+        {
+            using (var webClient = new CookieWebClient(cookieContainer))
+            {
+                HttpWebResponse error;
+                string response = DownloadString(string.Format(PluginUrl, resourceId), out error);
+
+                if (error?.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    return null; // Plugin not found or not allowed access.
+                }
+
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(response);
 
                 var rootNode = htmlDoc.DocumentNode;
-                var content = rootNode.SelectSingleNode("//*[@id=\"content\"]");
+                var result = new Plugin();
+                var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
 
-                if (content.GetAttributeValue("class", "").Contains("error_with_login"))
+                result.Name = ParsePluginName(resourceDesc);
+                result.Description = resourceDesc.SelectSingleNode("p").InnerText;
+
+                var historyTable = rootNode.SelectSingleNode("//*[@class='dataTable resourceHistory']");
+
+                foreach (var rowNode in historyTable.SelectNodes("tr").Skip(1)) // Skip header
                 {
-                    return false;
+                    Plugin.Version item = new Plugin.Version();
+                    item.Value = rowNode.SelectSingleNode("td[1]").InnerText;
+
+                    HtmlNode dateTimeNode = rowNode.SelectSingleNode("td[2]/*[@class='DateTime']");
+                    string dateString = dateTimeNode.GetAttributeValue("title", dateTimeNode.InnerText);
+                    item.ReleaseDate = DateTime.ParseExact(dateString, "MMM d', 'yyyy' at 'h:mm' 'tt", CultureInfo.InvariantCulture).ToUniversalTime();
+
+                    string downloadsString = rowNode.SelectSingleNode("td[3]").InnerText;
+                    item.Downloads = int.Parse(downloadsString, NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+
+                    result.Versions.Add(item);
                 }
 
-                return true;
+                return result;
             }
         }
-        
-        public OxideApi()
+
+        private string ParsePluginName(HtmlNode resourceDesc)
         {
-            webClient = new CookieWebClient(cookieContainer);
+            string title = resourceDesc.SelectSingleNode("h1").InnerText.Trim();
+
+            var regex = new Regex(@"(.+)\sfor\s", RegexOptions.IgnoreCase);
+            return regex.Split(title)[1];
         }
-
-        public void Dispose()
-        {
-            webClient.Dispose();
-        }
-
-
     }
 }

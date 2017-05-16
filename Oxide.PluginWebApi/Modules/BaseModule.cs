@@ -47,7 +47,7 @@ namespace Oxide.PluginWebApi.Modules
                 }
                 catch (Exception ex)
                 {
-                    response = new ApiResponse(null, HttpStatusCode.InternalServerError, ex.Message);
+                    response = new ApiResponse(null, HttpStatusCode.InternalServerError, ex.ToString());
                 }
 
                 return ResponseFromResult(response);
@@ -63,7 +63,8 @@ namespace Oxide.PluginWebApi.Modules
                 {
                     if (result != null)
                     {
-                        var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(result.Data, serializerSettings));
+                        var response = result.StatusCode == HttpStatusCode.OK ? result.Data : result;
+                        var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response, serializerSettings));
                         stream.Write(bytes, 0, bytes.Length);
                     }
                 },
