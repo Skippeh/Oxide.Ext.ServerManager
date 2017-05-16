@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Nancy.Helpers;
 using Oxide.PluginWebApi.Modules;
 using Oxide.PluginWebApi.Net.Models.Oxide;
 
@@ -88,7 +89,8 @@ namespace Oxide.PluginWebApi.Net
             result.Downloads = int.Parse(downloadsString, NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
 
             string downloadHref = rowNode.SelectSingleNode("td[4]/a").GetAttributeValue("href", null);
-
+            string versionStr = HttpUtility.ParseQueryString(downloadHref.Split('?')[1])["version"];
+            result.Id = int.Parse(versionStr);
 
             return result;
         }

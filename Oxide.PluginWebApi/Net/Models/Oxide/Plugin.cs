@@ -10,6 +10,7 @@ namespace Oxide.PluginWebApi.Net.Models.Oxide
     {
         public class Version
         {
+            public int Id { get; set; }
             public string Value { get; set; }
             public int Downloads { get; set; }
             public DateTime ReleaseDate { get; set; }
