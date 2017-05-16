@@ -10,11 +10,11 @@ namespace Oxide.PluginWebApi.Net
     {
         protected CookieWebClient WebClient { get; private set; }
 
-        private static readonly CookieContainer cookieContainer = new CookieContainer();
+        protected static readonly CookieContainer CookieContainer = new CookieContainer();
 
         protected BaseApi()
         {
-            WebClient = new CookieWebClient(cookieContainer);
+            WebClient = new CookieWebClient(CookieContainer);
         }
 
         public void Dispose()

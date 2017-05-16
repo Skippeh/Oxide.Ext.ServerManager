@@ -16,12 +16,10 @@ namespace Oxide.PluginWebApi.Net
     public class OxideApi : BaseApi
     {
         private const string PluginUrl = "http://oxidemod.org/plugins/{0}/history";
-
-        private static readonly CookieContainer cookieContainer = new CookieContainer();
         
         public static bool Authenticate(string username, string password)
         {
-            using (var webClient = new CookieWebClient(cookieContainer))
+            using (var webClient = new CookieWebClient(CookieContainer))
             {
                 HttpWebResponse error;
                 string response = PostString(webClient, "http://oxidemod.org/login/login", new NameValueCollection
@@ -47,45 +45,52 @@ namespace Oxide.PluginWebApi.Net
 
         public Plugin GetPlugin(int resourceId)
         {
-            using (var webClient = new CookieWebClient(cookieContainer))
-            {
-                HttpWebResponse error;
-                string response = DownloadString(string.Format(PluginUrl, resourceId), out error);
+             HttpWebResponse error;
+             string response = DownloadString(string.Format(PluginUrl, resourceId), out error);
 
-                if (error?.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    return null; // Plugin not found or not allowed access.
-                }
+             if (error?.StatusCode == HttpStatusCode.Forbidden)
+             {
+                 return null; // Plugin not found or not allowed access.
+             }
 
-                var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(response);
+             var htmlDoc = new HtmlDocument();
+             htmlDoc.LoadHtml(response);
 
-                var rootNode = htmlDoc.DocumentNode;
-                var result = new Plugin();
-                var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
+             var rootNode = htmlDoc.DocumentNode;
+             var result = new Plugin();
+             var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
 
-                result.Name = ParsePluginName(resourceDesc);
-                result.Description = resourceDesc.SelectSingleNode("p").InnerText;
+             result.Name = ParsePluginName(resourceDesc);
+             result.Description = resourceDesc.SelectSingleNode("p").InnerText;
 
-                var historyTable = rootNode.SelectSingleNode("//*[@class='dataTable resourceHistory']");
+             var historyTable = rootNode.SelectSingleNode("//*[@class='dataTable resourceHistory']");
 
-                foreach (var rowNode in historyTable.SelectNodes("tr").Skip(1)) // Skip header
-                {
-                    Plugin.Version item = new Plugin.Version();
-                    item.Value = rowNode.SelectSingleNode("td[1]").InnerText;
+             foreach (var rowNode in historyTable.SelectNodes("tr").Skip(1)) // Skip header
+             {
+                 Plugin.Version item = ParsePluginRow(rowNode);
+                 result.Versions.Add(item);
+             }
 
-                    HtmlNode dateTimeNode = rowNode.SelectSingleNode("td[2]/*[@class='DateTime']");
-                    string dateString = dateTimeNode.GetAttributeValue("title", dateTimeNode.InnerText);
-                    item.ReleaseDate = DateTime.ParseExact(dateString, "MMM d', 'yyyy' at 'h:mm' 'tt", CultureInfo.InvariantCulture).ToUniversalTime();
+             return result;
+        }
 
-                    string downloadsString = rowNode.SelectSingleNode("td[3]").InnerText;
-                    item.Downloads = int.Parse(downloadsString, NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+        private static Plugin.Version ParsePluginRow(HtmlNode rowNode)
+        {
+            Plugin.Version result = new Plugin.Version();
 
-                    result.Versions.Add(item);
-                }
+            result.Value = rowNode.SelectSingleNode("td[1]").InnerText;
 
-                return result;
-            }
+            HtmlNode dateTimeNode = rowNode.SelectSingleNode("td[2]/*[@class='DateTime']");
+            string dateString = dateTimeNode.GetAttributeValue("title", dateTimeNode.InnerText);
+            result.ReleaseDate = DateTime.ParseExact(dateString, "MMM d', 'yyyy' at 'h:mm' 'tt", CultureInfo.InvariantCulture).ToUniversalTime();
+
+            string downloadsString = rowNode.SelectSingleNode("td[3]").InnerText;
+            result.Downloads = int.Parse(downloadsString, NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+
+            string downloadHref = rowNode.SelectSingleNode("td[4]/a").GetAttributeValue("href", null);
+
+
+            return result;
         }
 
         private string ParsePluginName(HtmlNode resourceDesc)
