@@ -99,6 +99,9 @@ namespace Oxide.PluginWebApi.Net
         {
             string title = resourceDesc.SelectSingleNode("h1").InnerText.Trim();
 
+            if (!title.ToLower().Contains(" for ")) // Universal plugins don't have the "for Game" suffix.
+                return title;
+
             var regex = new Regex(@"(.+)\sfor\s", RegexOptions.IgnoreCase);
             return regex.Split(title)[1];
         }
