@@ -46,33 +46,34 @@ namespace Oxide.PluginWebApi.Net
 
         public Plugin GetPlugin(int resourceId)
         {
-             HttpWebResponse error;
-             string response = DownloadString(string.Format(PluginUrl, resourceId), out error);
+            HttpWebResponse error;
+            string response = DownloadString(string.Format(PluginUrl, resourceId), out error);
 
-             if (error?.StatusCode == HttpStatusCode.Forbidden)
-             {
-                 return null; // Plugin not found or not allowed access.
-             }
+            if (error?.StatusCode == HttpStatusCode.Forbidden)
+            {
+                return null; // Plugin not found or not allowed access.
+            }
 
-             var htmlDoc = new HtmlDocument();
-             htmlDoc.LoadHtml(response);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
 
-             var rootNode = htmlDoc.DocumentNode;
-             var result = new Plugin();
-             var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
+            var rootNode = htmlDoc.DocumentNode;
+            var result = new Plugin();
+            var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
 
-             result.Name = ParsePluginName(resourceDesc);
-             result.Description = resourceDesc.SelectSingleNode("p").InnerText;
+            result.Name = ParsePluginName(resourceDesc);
 
-             var historyTable = rootNode.SelectSingleNode("//*[@class='dataTable resourceHistory']");
+            result.Description = resourceDesc.SelectSingleNode("p").InnerText;
 
-             foreach (var rowNode in historyTable.SelectNodes("tr").Skip(1)) // Skip header
-             {
-                 Plugin.Version item = ParsePluginRow(rowNode);
-                 result.Versions.Add(item);
-             }
+            var historyTable = rootNode.SelectSingleNode("//*[@class='dataTable resourceHistory']");
 
-             return result;
+            foreach (var rowNode in historyTable.SelectNodes("tr").Skip(1)) // Skip header
+            {
+                Plugin.Version item = ParsePluginRow(rowNode);
+                result.Versions.Add(item);
+            }
+
+            return result;
         }
 
         private static Plugin.Version ParsePluginRow(HtmlNode rowNode)
