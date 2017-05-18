@@ -10,12 +10,10 @@ namespace Oxide.PluginWebApi
     internal class Program
     {
         public static ApiConfig Config { get; private set; }
-        public static CookieContainer CookieContainer { get; private set; }
 
         static void Main(string[] args)
         {
             Config = ConfigManager<ApiConfig>.LoadOrCreate();
-            CookieContainer = new CookieContainer();
 
             using (var host = new NancyHost(new ApiBootstrapper(), new HostConfiguration
             {
