@@ -10,7 +10,6 @@ namespace Oxide.PluginWebApi.Modules
         {
             Get["lastupdate"] = WrapMethod(_ => GetLastUpdate());
             Get["plugin/{resourceId:int}"] = WrapMethod((dynamic _) => GetPlugin(_.resourceId));
-            Get["plugin/search"] = WrapMethod(_ => SearchPlugins());
         }
 
         private ApiResponse GetLastUpdate()
@@ -34,23 +33,6 @@ namespace Oxide.PluginWebApi.Modules
                     throw new ApiResponseException(HttpStatusCode.NotFound, "Could not find a plugin with resource id: " + resourceId);
 
                 return new ApiResponse(plugin);
-            }
-        }
-
-        private ApiResponse SearchPlugins()
-        {
-            string query = Request.Query.q;
-            query = query?.Trim();
-
-            if (string.IsNullOrEmpty(query))
-                throw new ApiResponseException(HttpStatusCode.BadRequest, "No query specified");
-
-            query = query.Trim();
-
-            using (var oxide = CreateOxideApi())
-            {
-                Plugin[] plugins = oxide.SearchPlugins(query);
-                return new ApiResponse(plugins);
             }
         }
     }
