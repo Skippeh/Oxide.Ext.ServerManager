@@ -118,5 +118,14 @@ namespace Oxide.PluginWebApi.Net
             var regex = new Regex(@".+\sfor\s(.+)", RegexOptions.IgnoreCase);
             return regex.Split(title)[1];
         }
+
+        public Plugin[] SearchPlugins(string query)
+        {
+            var result = new List<Plugin>();
+
+
+
+            return result.ToArray();
+        }
     }
 }
