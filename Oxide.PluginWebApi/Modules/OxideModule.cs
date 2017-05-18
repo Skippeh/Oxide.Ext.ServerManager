@@ -10,6 +10,7 @@ namespace Oxide.PluginWebApi.Modules
         {
             Get["lastupdate"] = WrapMethod(_ => GetLastUpdate());
             Get["plugin/{resourceId:int}"] = WrapMethod((dynamic _) => GetPlugin(_.resourceId));
+            Get["plugin/{resourceId:int}/download/{version:int}"] = WrapMethod((dynamic _) => DownloadPlugin(_.resourceId, _.version));
         }
 
         private ApiResponse GetLastUpdate()
@@ -33,6 +34,17 @@ namespace Oxide.PluginWebApi.Modules
                     throw new ApiResponseException(HttpStatusCode.NotFound, "Could not find a plugin with resource id: " + resourceId);
 
                 return new ApiResponse(plugin);
+            }
+        }
+
+        private ApiResponse DownloadPlugin(int resourceId, int version)
+        {
+            using (var oxide = CreateOxideApi())
+            {
+                return new ApiResponse(new
+                {
+                    script = oxide.DownloadPlugin(resourceId, version)
+                });
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -17,6 +18,7 @@ namespace Oxide.PluginWebApi.Net
     public class OxideApi : BaseApi
     {
         private const string PluginUrl = "http://oxidemod.org/plugins/{0}/history";
+        private const string DownloadUrl = "http://oxidemod.org/plugins/{0}/download?version={1}";
         
         public static bool Authenticate(string username, string password)
         {
@@ -75,6 +77,29 @@ namespace Oxide.PluginWebApi.Net
             }
 
             return result;
+        }
+
+        public string DownloadPlugin(int resourceId, int version)
+        {
+            if (!Directory.Exists("cache/plugins"))
+                Directory.CreateDirectory("cache/plugins");
+
+            var cachePath = $"cache/plugins/{resourceId}-{version}.plugin";
+
+            if (File.Exists(cachePath))
+            {
+                return File.ReadAllText(cachePath);
+            }
+
+            HttpWebResponse error;
+            string script = DownloadString(string.Format(DownloadUrl, resourceId, version), out error);
+
+            if (error != null)
+                throw new ApiResponseException(global::Nancy.HttpStatusCode.NotFound, "Plugin version could not be found");
+
+            File.WriteAllText(cachePath, script);
+
+            return script;
         }
 
         private static Plugin.Version ParsePluginRow(HtmlNode rowNode)
