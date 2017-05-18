@@ -62,6 +62,7 @@ namespace Oxide.PluginWebApi.Net
             var resourceDesc = rootNode.SelectSingleNode("//*[@class='mainContent']/div[@class='resourceInfo']/div[@class='resourceDesc']");
 
             result.Name = ParsePluginName(resourceDesc);
+            result.Game = ParsePluginGame(resourceDesc);
 
             result.Description = resourceDesc.SelectSingleNode("p").InnerText;
 
@@ -104,6 +105,17 @@ namespace Oxide.PluginWebApi.Net
                 return title;
 
             var regex = new Regex(@"(.+)\sfor\s", RegexOptions.IgnoreCase);
+            return regex.Split(title)[1];
+        }
+
+        private string ParsePluginGame(HtmlNode resourceDesc)
+        {
+            string title = resourceDesc.SelectSingleNode("h1").InnerText.Trim();
+
+            if (!title.ToLower().Contains(" for "))
+                return null;
+
+            var regex = new Regex(@".+\sfor\s(.+)", RegexOptions.IgnoreCase);
             return regex.Split(title)[1];
         }
     }

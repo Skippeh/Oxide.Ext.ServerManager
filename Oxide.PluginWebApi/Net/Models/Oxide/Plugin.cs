@@ -17,6 +17,7 @@ namespace Oxide.PluginWebApi.Net.Models.Oxide
         }
 
         public string Name { get; set; }
+        public string Game { get; set; }
         public string Description { get; set; }
         public List<Version> Versions { get; set; } = new List<Version>();
     }
