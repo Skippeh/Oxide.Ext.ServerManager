@@ -25,14 +25,14 @@ namespace Oxide.PluginWebApi
                 }
             }, new Uri($"http://localhost:{Config.Port}")))
             {
-                Console.WriteLine($"Starting api server on port {Config.Port}...");
-                host.Start();
-
                 if (!OxideApi.Authenticate(Config.OxideUsername, Config.OxidePassword))
                 {
                     Console.Error.WriteLine("Failed to authenticate with Oxide.");
                     return;
                 }
+
+                Console.WriteLine($"Starting api server on port {Config.Port}...");
+                host.Start();
 
                 Console.WriteLine("Press CTRL+Q to stop the server.");
                 ConsoleKeyInfo consoleKeyInfo;
